@@ -186,52 +186,73 @@ void search_Book()
 {
     while(1)
     {
-
-        printf("Please enter the name of the book you want to find (-1 to go back): ");
-        char input[MAX_TITLE + 2];
-        fgets(input, MAX_TITLE + 2, stdin);
-        if(strpbrk(input, "\n\r") == NULL)
+        printf("How would you like to search?\n|1| title\n|2| author\n|3| ID\n(-1 to go back): ");
+        int mode;
+        if(scanf("%d", &mode) == 1 && (mode == -1 || mode == 1 || mode == 2 || mode == 3))
         {
-            printf("\nLimit exceeded!");
-            clear_input_buffer();
-            continue;
+            if(mode == -1) return;
+            printf("\nEnter %s (-1 to go back): ", (mode == 1 ? "title" : (mode == 2 ? "author" : "ID")));
         }
         else
         {
-            input[strcspn(input, "\n\r")] = '\0';
-            if (strcmp(input, "-1") == 0) break;
-
-            char loweredinput[MAX_TITLE + 2];
-            strcpy(loweredinput, input);
-            lowercase_text(loweredinput);
-
-            int found_count = 0;
-            printf("\n--- SEARCH RESULTS ---\n");
-            for(int i = 0; i < number_of_books; i++)
-            {
-                char temp[MAX_TITLE + 1];
-                strcpy(temp, archive[i].title);
-                lowercase_text(temp);
-
-                if(strstr(temp, loweredinput) != NULL)
-                {
-
-                    found_count++;
-                    printf("%d)\n", found_count);
-                    printf("Title  : %s\n", archive[i].title);
-                    printf("Author : %s\n", archive[i].author);
-                    printf("Page   : %d\n", archive[i].page);
-                    printf("ID     : %d\n\n", archive[i].ID);
-                }
-            }
-            if(found_count > 0)
-            {
-                printf("\n------------------------------\n");
-                printf("Success: %d book(s) found.\n", found_count);
-                printf("------------------------------\n");
-            }
-            else printf("\n! No matches found for your search.\n");
+            printf("Invalid input!\n\n");
+            clear_input_buffer();
+            continue;
         }
+        clear_input_buffer();
+
+
+        if(mode == 1 || mode == 2)
+        {
+            int temp_input_size = mode == 1 ? MAX_TITLE + 2 : MAX_AUTHOR + 2;
+
+            char input[temp_input_size];
+            fgets(input, temp_input_size, stdin);
+            if(strpbrk(input, "\n\r") == NULL)
+                printf("\nLimit exceeded!");
+                clear_input_buffer();
+                continue;
+            }
+            else
+            {
+                input[strcspn(input, "\n\r")] = '\0';
+                if (strcmp(input, "-1") == 0) break;
+
+                char loweredinput[temp_];
+                strcpy(loweredinput, input);
+                lowercase_text(loweredinput);
+
+                int found_count = 0;
+                printf("\n--- SEARCH RESULTS ---\n");
+                for(int i = 0; i < number_of_books; i++)
+                {
+                    char temp[temp_input_size - 1];
+                    strcpy(temp, mode == 1 ? archive[i].title : archive[i].author);
+                    lowercase_text(temp);
+                    //                       ^^^^^^ Burda kaldk
+
+                    if(strstr(temp, loweredinput) != NULL)
+                    {
+                        found_count++;
+                        printf("%d)\n", found_count);
+                        printf("Title  : %s\n", archive[i].title);
+                        printf("Author : %s\n", archive[i].author);
+                        printf("Page   : %d\n", archive[i].page);
+                        printf("ID     : %d\n\n", archive[i].ID);
+
+                    }
+                }
+                if(found_count > 0)
+                {
+                    printf("\n------------------------------\n");
+                    printf("Success: %d book(s) found.\n", found_count);
+                    printf("------------------------------\n");
+                }
+                else printf("\n! No matches found for your search.\n");
+            }
+        }
+
+
     }
 }
 
