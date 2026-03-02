@@ -20,6 +20,20 @@ void lowercase_text(char text[])
     for(int i = 0; text[i] != '\0'; i++)
         text[i] = tolower((unsigned char)text[i]);
 }
+int input_limit_check(char target[])
+{
+    if(strpbrk(target, "\n\r") == NULL)
+    {
+        printf("Limit exceeded!\n\n");
+        clear_input_buffer();
+        return 0;
+    }
+    else
+    {
+        target[strcspn(target, "\n\r")] = '\0';
+        return 1;
+    }
+}
 
 void delete_index_archive(int index)
 {
@@ -54,7 +68,7 @@ int ask_Q1(int case_size)
         }
         else
         {
-            printf("Invalid input! Please choose a number between 0-%d\n\n", case_size);
+            printf("\nInvalid input! Please choose a number between 0-%d\n\n", case_size);
             clear_input_buffer();
         }
     }
@@ -85,39 +99,22 @@ void show_Books()
 
 void add_Book()
 {
-    if(number_of_books < library_size) {
+    if(number_of_books < library_size)
+    {
         int index = number_of_books;
 
         while(1)
         {
             printf("Please enter the title (Max 127 characters): ");
             fgets(archive[index].title, MAX_TITLE, stdin);
-            if(strpbrk(archive[index].title, "\n\r") == NULL)
-            {
-                printf("\nLimit exceeded!");
-                clear_input_buffer();
-            }
-            else
-            {
-                archive[index].title[strcspn(archive[index].title, "\n\r")] = '\0';
-                break;
-            }
+            if(input_limit_check(archive[index].title)) break;
         }
 
         while(1)
         {
             printf("Please enter the author (Max 63 characters): ");
             fgets(archive[index].author, MAX_AUTHOR, stdin);
-            if(strpbrk(archive[index].author, "\n\r") == NULL)
-            {
-                printf("\nLimit exceeded!");
-                clear_input_buffer();
-            }
-            else
-            {
-                archive[index].author[strcspn(archive[index].author, "\n\r")] = '\0';
-                break;
-            }
+            if(input_limit_check(archive[index].author)) break;
         }
 
         while(1)
@@ -125,14 +122,15 @@ void add_Book()
             printf("Please enter page count (1 - 20000): ");
             if(scanf("%d", &archive[index].page) != 1)
             {
-                printf("\nPlease enter a valid number!\n");
+                printf("Please enter a valid number!\n\n");
                 clear_input_buffer();
                 continue;
             }
 
-            if(archive[index].page < 1 || archive[index].page > 20000)
+            int maxnumber = 20000;
+            if(archive[index].page < 1 || archive[index].page > maxnumber)
             {
-                printf("\nPage count must be between 1 and 20000!\n");
+                printf("Page count must be between 1 and %d!\n\n", maxnumber);
             }
             else
             {
@@ -146,9 +144,7 @@ void add_Book()
 
         printf("\nBook added successfully! (ID: %d)\n", archive[index].ID);
     }
-    else {
-        printf("\nLibrary is full!\n");
-    }
+    else printf("\nLibrary is full!\n");
 }
 
 void remove_Book()
@@ -191,7 +187,7 @@ void search_Book()
         if(scanf("%d", &mode) == 1 && (mode == -1 || mode == 1 || mode == 2 || mode == 3))
         {
             if(mode == -1) return;
-            printf("\nEnter %s (-1 to go back): ", (mode == 1 ? "title" : (mode == 2 ? "author" : "ID")));
+            printf("Please enter the %s of the book (-1 to go back): ", (mode == 1 ? "title" : (mode == 2 ? "author" : "ID")));
         }
         else
         {
@@ -202,57 +198,71 @@ void search_Book()
         clear_input_buffer();
 
 
-        if(mode == 1 || mode == 2)
-        {
-            int temp_input_size = mode == 1 ? MAX_TITLE + 2 : MAX_AUTHOR + 2;
-
-            char input[temp_input_size];
-            fgets(input, temp_input_size, stdin);
-            if(strpbrk(input, "\n\r") == NULL)
-                printf("\nLimit exceeded!");
-                clear_input_buffer();
-                continue;
-            }
-            else
+            if(mode == 1 || mode == 2)
             {
-                input[strcspn(input, "\n\r")] = '\0';
-                if (strcmp(input, "-1") == 0) break;
+                int temp_input_size = mode == 1 ? MAX_TITLE + 2 : MAX_AUTHOR + 2;
 
-                char loweredinput[temp_];
-                strcpy(loweredinput, input);
-                lowercase_text(loweredinput);
+                char input[temp_input_size];
+                fgets(input, temp_input_size, stdin);
+                if(input_limit_check(input))
+                {
+                    input[strcspn(input, "\n\r")] = '\0';
+                    if (strcmp(input, "-1") == 0) break;
 
-                int found_count = 0;
-                printf("\n--- SEARCH RESULTS ---\n");
+                    char loweredinput[temp_input_size];
+                    strcpy(loweredinput, input);
+                    lowercase_text(loweredinput);
+
+                    int found_count = 0;
+                    printf("\n--- SEARCH RESULTS ---\n");
+                    for(int i = 0; i < number_of_books; i++)
+                    {
+                        char temp[temp_input_size - 1];
+                        strcpy(temp, mode == 1 ? archive[i].title : archive[i].author);
+                        lowercase_text(temp);
+
+                        if(strstr(temp, loweredinput) != NULL)
+                        {
+                            found_count++;
+                            printf("%d)\n", found_count);
+                            printf("Title  : %s\n", archive[i].title);
+                            printf("Author : %s\n", archive[i].author);
+                            printf("Page   : %d\n", archive[i].page);
+                            printf("ID     : %d\n\n", archive[i].ID);
+
+                        }
+                    }
+                    if(found_count > 0)
+                    {
+                        printf("\n------------------------------\n");
+                        printf("Success: %d book(s) found.\n", found_count);
+                        printf("------------------------------\n\n");
+                    }
+                    else printf("\n! No matches found for your search.\n\n");
+                }
+            }
+        else if(mode == 3)
+        {
+            int input;
+            if(scanf("%d", &input) ==  1)
+            {
+                int found = 0;
                 for(int i = 0; i < number_of_books; i++)
                 {
-                    char temp[temp_input_size - 1];
-                    strcpy(temp, mode == 1 ? archive[i].title : archive[i].author);
-                    lowercase_text(temp);
-                    //                       ^^^^^^ Burda kaldk
-
-                    if(strstr(temp, loweredinput) != NULL)
+                    if(archive[i].ID == input)
                     {
-                        found_count++;
-                        printf("%d)\n", found_count);
-                        printf("Title  : %s\n", archive[i].title);
+                        found = 1;
+                        printf("\n--- SEARCH RESULT ---\n");
+                        printf("\nTitle  : %s\n", archive[i].title);
                         printf("Author : %s\n", archive[i].author);
                         printf("Page   : %d\n", archive[i].page);
                         printf("ID     : %d\n\n", archive[i].ID);
-
+                        break;
                     }
                 }
-                if(found_count > 0)
-                {
-                    printf("\n------------------------------\n");
-                    printf("Success: %d book(s) found.\n", found_count);
-                    printf("------------------------------\n");
-                }
-                else printf("\n! No matches found for your search.\n");
+                if(found < 1) printf("\n! No matches found for your search.\n\n");
             }
         }
-
-
     }
 }
 
