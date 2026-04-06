@@ -1,0 +1,21 @@
+# depslib dependency file v1.0
+1772112163 source:c:\users\erayg\desktop\library_system\main.c
+	<stdio.h>
+	"library.h"
+
+1771588536 c:\users\erayg\desktop\library_system\functions.c
+	<stdio.h>
+	"library.h"
+
+1772466633 c:\users\erayg\desktop\library_system\library.h
+
+1772092125 source:c:\users\erayg\desktop\library_system\functions.c
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	<ctype.h>
+	"library.h"
+
+1771591900 source:c:\users\erayg\desktop\library_system\library.c
+	"library.h"
+
